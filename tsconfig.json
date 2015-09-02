@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+      "module": "commonjs",
+      "noImplicitAny": true,
+      "outDir": "lib",
+      "watch": true
+  },
+  "files": [
+    "src/skewSlider.ts",
+    "src/utility.ts"
+  ]
+}

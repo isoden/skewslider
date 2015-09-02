@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cuprum:400italic">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <meta name="viewport" content="width=640">
+    <style>
+      body {
+        margin: 0;
+        text-align: center;
+      }
+
+      h1 {
+        font-style: italic;
+        font-family: Cuprum, serif;
+        font-weight: 400;
+      }
+
+      a {
+        color: #259dff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><a href="https://github.com/isoden/skewSlider"><i class="fa fa-github"></i> isoden/skewSlider</a></h1>
+    <canvas id="canvas" width="640" height="640"></canvas>
+
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="../skewslider.js"></script>
+    <script>
+      var canvas = document.getElementById('canvas');
+      window.skewSlider = new SkewSlider({
+        el       : canvas,
+        interval : 4000,
+        duration : 1400,
+        sources  : [
+          'http://placeimg.com/640/640/people?p=1',
+          'http://placeimg.com/640/640/people?p=2',
+          'http://placeimg.com/640/640/people?p=3',
+          'http://placeimg.com/640/640/people?p=4'
+        ]
+      });
+    </script>
+  </body>
+</html>
