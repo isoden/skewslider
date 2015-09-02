@@ -3,8 +3,11 @@ skewSlider
 
 [![npm](https://img.shields.io/npm/v/skewslider.svg?style=flat-square)](https://www.npmjs.com/package/skewslider)
 
+## Demo
 
-## installation
+- [http://isoden.github.io/skewSlider/demo](http://isoden.github.io/skewSlider/demo)
+
+## Installation
 
 ```
  $ npm install --save skewslider
