@@ -1,5 +1,5 @@
 /*!
- * skewslider.js v1.0.0
+ * skewslider.js v1.0.1
  * https://github.com/isoden/skewslider.git
  *
  * Copyright (c) 2015 isoden <isoda@maboroshi.biz> (http://isoden.me)

@@ -44,7 +44,7 @@ gulp.task('default', () => {
 });
 
 gulp.task('build', () => {
-  gulp.src('skewSlider.js')
+  gulp.src('./skewslider.js')
     .pipe($.header(banner))
     .pipe(gulp.dest('./'))
     .pipe($.uglify({preserveComments: 'some'}))
