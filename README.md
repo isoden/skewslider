@@ -33,3 +33,11 @@ var skewSlider = new SkewSlider({
   ]
 });
 ```
+
+## Support
+
+IE >= 9 and modern browsers.
+
+## License
+
+MIT License.
