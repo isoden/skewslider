@@ -1,11 +1,3 @@
-/*!
- * skewslider.js v1.1.1
- * https://github.com/isoden/skewslider.git
- *
- * Copyright (c) 2015 isoden <isoda@maboroshi.biz> (http://isoden.me)
- * Licensed under the MIT license.
- */
-
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.SkewSlider = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /// <reference path="../typings/bundle.d.ts" />
 var es6_promise_1 = require('es6-promise');
@@ -16,7 +8,7 @@ var SkewSlider = (function () {
      */
     function SkewSlider(_a) {
         var _this = this;
-        var el = _a.el, sources = _a.sources, angle = _a.angle, interval = _a.interval, duration = _a.duration;
+        var el = _a.el, sources = _a.sources, _b = _a.angle, angle = _b === void 0 ? 0 : _b, _c = _a.interval, interval = _c === void 0 ? 2000 : _c, _d = _a.duration, duration = _d === void 0 ? 1000 : _d;
         this._el = el;
         this._ctx = this._el.getContext('2d');
         this._width = this._el.width;

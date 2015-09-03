@@ -34,7 +34,7 @@ class SkewSlider {
   /**
    * 初期化処理
    */
-  constructor({el, sources, angle, interval, duration}: SkewSliderOptions) {
+  constructor({el, sources, angle = 0, interval = 2000, duration = 1000}: SkewSliderOptions) {
     this._el           = el;
     this._ctx          = this._el.getContext('2d');
     this._width        = this._el.width;
