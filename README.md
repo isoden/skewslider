@@ -23,6 +23,7 @@ skewSlider
 ```js
 var skewSlider = new SkewSlider({
   el       : document.getElementById('canvas'),
+  angle    : 15,
   interval : 5000,
   duration : 1000,
   sources  : [
@@ -33,6 +34,16 @@ var skewSlider = new SkewSlider({
   ]
 });
 ```
+
+## Options
+
+|name|description|default|
+|:---|:---|:----|
+|el: HTMLCanvasElement|描画対象のCanvas要素|-|
+|angle: number  |斜めの角度|0|
+|interval: number  |次のアニメーションまでの時間(ms)|2000|
+|duration: number  |アニメーションの時間(ms)|1000|
+|sources: string[]  |画像URLの配列|-|
 
 ## Support
 
