@@ -1,18 +1,25 @@
 /// <reference path="../typings/bundle.d.ts" />
 
 import {Promise} from 'es6-promise';
-import {tween}   from './utility';
+import {
+  tween,
+  toRadian
+} from './utility';
 
 interface SkewSliderOptions {
   el       : HTMLCanvasElement;
+  angle    : number;
   sources  : string[];
   interval : number;
   duration : number;
 }
 
-/**
- * @class SkewSlider
- */
+interface ClipPathRegion {
+  size : number;
+  x    : number;
+  y    : number;
+}
+
 class SkewSlider {
   protected _el           : HTMLCanvasElement;
   protected _ctx          : CanvasRenderingContext2D;
@@ -20,19 +27,21 @@ class SkewSlider {
   protected _height       : number;
   protected _images       : HTMLImageElement[];
   protected _visibleIndex : number;
+  protected _angle        : number;
   protected _interval     : number;
   protected _duration     : number;
 
   /**
    * 初期化処理
    */
-  constructor({el, sources, interval, duration}: SkewSliderOptions) {
+  constructor({el, sources, angle, interval, duration}: SkewSliderOptions) {
     this._el           = el;
     this._ctx          = this._el.getContext('2d');
     this._width        = this._el.width;
     this._height       = this._el.height;
     this._images       = [];
     this._visibleIndex = 0;
+    this._angle        = angle;
     this._interval     = interval;
     this._duration     = duration;
 
@@ -88,8 +97,9 @@ class SkewSlider {
    * クリップパスの領域をアニメーションする
    */
   protected _animate() {
+    let direction = this._width  * Math.sin(toRadian(this._angle)) + this._height * Math.cos(toRadian(this._angle));
     return tween({
-      start      : this._width * 2,
+      start      : direction,
       end        : 0,
       duration   : this._duration,
       onComplete : () => {},
@@ -122,14 +132,36 @@ class SkewSlider {
   /**
    * クリップパスの領域を作る
    */
-  protected _createClipPath(value: number) {
+  protected _createClipPath(size: number) {
+    let clipPath = this._getClippingRegion();
+
     this._ctx.beginPath();
-    this._ctx.moveTo(0, 0);
-    this._ctx.lineTo(0, value);
-    this._ctx.lineTo(value, 0);
+    this._ctx.save();
+    this._ctx.translate(clipPath.x + clipPath.size / 2, clipPath.y + clipPath.size / 2);
+    this._ctx.rotate(toRadian(this._angle));
+    this._ctx.rect(- clipPath.size / 2, - clipPath.size / 2, size, clipPath.size);
+    this._ctx.restore();
     this._ctx.closePath();
     this._ctx.clip();
   }
+
+  /**
+   * クリップパス領域の座標情報を返却する
+   */
+  protected _getClippingRegion(): ClipPathRegion {
+    let width  = this._width  * Math.sin(toRadian(this._angle));
+    let height = this._height * Math.cos(toRadian(this._angle));
+    let size   = width + height;
+    let posX   = this._width / 2  - size / 2;
+    let posY   = this._height / 2 - size / 2;
+
+    return {
+      size,
+      x    : posX,
+      y    : posY
+    };
+  }
 }
+
 
 export = SkewSlider;

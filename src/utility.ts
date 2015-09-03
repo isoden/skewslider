@@ -8,7 +8,7 @@ interface TweenOptions {
 }
 
 export function tween({start, end, duration, onUpdate, onComplete}: TweenOptions) {
-  let diff        = Math.abs(end) + Math.abs(start);
+  let diff        = end - start;
   let prevTime    = +new Date();
   let elapsedTime = 0;
 
@@ -16,7 +16,7 @@ export function tween({start, end, duration, onUpdate, onComplete}: TweenOptions
     let timer = raf(function ticker() {
       let now         = +new Date();
       let timeRate    = elapsedTime / duration;
-      let changeValue = start - diff * (1 - Math.pow((1 - timeRate), 3));
+      let changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
 
       onUpdate(changeValue);
 
@@ -58,4 +58,8 @@ export function cancelRaf(requestId: number) {
       clearTimeout(requestId);
     }
   )(requestId);
+}
+
+export function toRadian(degree: number): number {
+  return degree * Math.PI / 180;
 }

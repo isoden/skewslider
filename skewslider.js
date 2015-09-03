@@ -1,5 +1,5 @@
 /*!
- * skewslider.js v1.0.1
+ * skewslider.js v1.1.1
  * https://github.com/isoden/skewslider.git
  *
  * Copyright (c) 2015 isoden <isoda@maboroshi.biz> (http://isoden.me)
@@ -10,22 +10,20 @@
 /// <reference path="../typings/bundle.d.ts" />
 var es6_promise_1 = require('es6-promise');
 var utility_1 = require('./utility');
-/**
- * @class SkewSlider
- */
 var SkewSlider = (function () {
     /**
      * 初期化処理
      */
     function SkewSlider(_a) {
         var _this = this;
-        var el = _a.el, sources = _a.sources, interval = _a.interval, duration = _a.duration;
+        var el = _a.el, sources = _a.sources, angle = _a.angle, interval = _a.interval, duration = _a.duration;
         this._el = el;
         this._ctx = this._el.getContext('2d');
         this._width = this._el.width;
         this._height = this._el.height;
         this._images = [];
         this._visibleIndex = 0;
+        this._angle = angle;
         this._interval = interval;
         this._duration = duration;
         this._preload(sources)
@@ -78,8 +76,9 @@ var SkewSlider = (function () {
      */
     SkewSlider.prototype._animate = function () {
         var _this = this;
+        var direction = this._width * Math.sin(utility_1.toRadian(this._angle)) + this._height * Math.cos(utility_1.toRadian(this._angle));
         return utility_1.tween({
-            start: this._width * 2,
+            start: direction,
             end: 0,
             duration: this._duration,
             onComplete: function () { },
@@ -109,13 +108,31 @@ var SkewSlider = (function () {
     /**
      * クリップパスの領域を作る
      */
-    SkewSlider.prototype._createClipPath = function (value) {
+    SkewSlider.prototype._createClipPath = function (size) {
+        var clipPath = this._getClippingRegion();
         this._ctx.beginPath();
-        this._ctx.moveTo(0, 0);
-        this._ctx.lineTo(0, value);
-        this._ctx.lineTo(value, 0);
+        this._ctx.save();
+        this._ctx.translate(clipPath.x + clipPath.size / 2, clipPath.y + clipPath.size / 2);
+        this._ctx.rotate(utility_1.toRadian(this._angle));
+        this._ctx.rect(-clipPath.size / 2, -clipPath.size / 2, size, clipPath.size);
+        this._ctx.restore();
         this._ctx.closePath();
         this._ctx.clip();
+    };
+    /**
+     * クリップパス領域の座標情報を返却する
+     */
+    SkewSlider.prototype._getClippingRegion = function () {
+        var width = this._width * Math.sin(utility_1.toRadian(this._angle));
+        var height = this._height * Math.cos(utility_1.toRadian(this._angle));
+        var size = width + height;
+        var posX = this._width / 2 - size / 2;
+        var posY = this._height / 2 - size / 2;
+        return {
+            size: size,
+            x: posX,
+            y: posY
+        };
     };
     return SkewSlider;
 })();
@@ -124,14 +141,14 @@ module.exports = SkewSlider;
 },{"./utility":2,"es6-promise":4}],2:[function(require,module,exports){
 function tween(_a) {
     var start = _a.start, end = _a.end, duration = _a.duration, onUpdate = _a.onUpdate, onComplete = _a.onComplete;
-    var diff = Math.abs(end) + Math.abs(start);
+    var diff = end - start;
     var prevTime = +new Date();
     var elapsedTime = 0;
     return new Promise(function (resolve, reject) {
         var timer = raf(function ticker() {
             var now = +new Date();
             var timeRate = elapsedTime / duration;
-            var changeValue = start - diff * (1 - Math.pow((1 - timeRate), 3));
+            var changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
             onUpdate(changeValue);
             // 1フレーム分の時間を経過時間に加算
             elapsedTime += now - prevTime;
@@ -166,6 +183,10 @@ function cancelRaf(requestId) {
         })(requestId);
 }
 exports.cancelRaf = cancelRaf;
+function toRadian(degree) {
+    return degree * Math.PI / 180;
+}
+exports.toRadian = toRadian;
 
 },{}],3:[function(require,module,exports){
 // shim for using process in browser
