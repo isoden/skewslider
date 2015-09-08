@@ -15,9 +15,10 @@ interface SkewSliderOptions {
 }
 
 interface ClipPathRegion {
-  size : number;
-  x    : number;
-  y    : number;
+  width  : number;
+  height : number;
+  x      : number;
+  y      : number;
 }
 
 class SkewSlider {
@@ -97,7 +98,7 @@ class SkewSlider {
    * クリップパスの領域をアニメーションする
    */
   protected _animate() {
-    let direction = this._width  * Math.sin(toRadian(this._angle)) + this._height * Math.cos(toRadian(this._angle));
+    let direction = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
     return tween({
       start      : direction,
       end        : 0,
@@ -137,9 +138,9 @@ class SkewSlider {
 
     this._ctx.beginPath();
     this._ctx.save();
-    this._ctx.translate(clipPath.x + clipPath.size / 2, clipPath.y + clipPath.size / 2);
+    this._ctx.translate(clipPath.x + clipPath.width / 2, clipPath.y + clipPath.height / 2);
     this._ctx.rotate(toRadian(this._angle));
-    this._ctx.rect(- clipPath.size / 2, - clipPath.size / 2, size, clipPath.size);
+    this._ctx.rect(- clipPath.width / 2, - clipPath.height / 2, size, clipPath.height);
     this._ctx.restore();
     this._ctx.closePath();
     this._ctx.clip();
@@ -149,14 +150,14 @@ class SkewSlider {
    * クリップパス領域の座標情報を返却する
    */
   protected _getClippingRegion(): ClipPathRegion {
-    let width  = this._width  * Math.sin(toRadian(this._angle));
-    let height = this._height * Math.cos(toRadian(this._angle));
-    let size   = width + height;
-    let posX   = this._width / 2  - size / 2;
-    let posY   = this._height / 2 - size / 2;
+    let width  = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
+    let height = Math.abs(this._width * Math.sin(toRadian(this._angle))) + Math.abs(this._height * Math.cos(toRadian(this._angle)));
+    let posX   = this._width  / 2 - width  / 2;
+    let posY   = this._height / 2 - height / 2;
 
     return {
-      size,
+      width,
+      height,
       x    : posX,
       y    : posY
     };

@@ -1,3 +1,11 @@
+/*!
+ * skewslider.js v1.1.2
+ * https://github.com/isoden/skewslider.git
+ *
+ * Copyright (c) 2015 isoden <isoda@maboroshi.biz> (http://isoden.me)
+ * Licensed under the MIT license.
+ */
+
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.SkewSlider = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /// <reference path="../typings/bundle.d.ts" />
 var es6_promise_1 = require('es6-promise');
@@ -68,7 +76,7 @@ var SkewSlider = (function () {
      */
     SkewSlider.prototype._animate = function () {
         var _this = this;
-        var direction = this._width * Math.sin(utility_1.toRadian(this._angle)) + this._height * Math.cos(utility_1.toRadian(this._angle));
+        var direction = Math.abs(this._width * Math.cos(utility_1.toRadian(this._angle))) + Math.abs(this._height * Math.sin(utility_1.toRadian(this._angle)));
         return utility_1.tween({
             start: direction,
             end: 0,
@@ -104,9 +112,9 @@ var SkewSlider = (function () {
         var clipPath = this._getClippingRegion();
         this._ctx.beginPath();
         this._ctx.save();
-        this._ctx.translate(clipPath.x + clipPath.size / 2, clipPath.y + clipPath.size / 2);
+        this._ctx.translate(clipPath.x + clipPath.width / 2, clipPath.y + clipPath.height / 2);
         this._ctx.rotate(utility_1.toRadian(this._angle));
-        this._ctx.rect(-clipPath.size / 2, -clipPath.size / 2, size, clipPath.size);
+        this._ctx.rect(-clipPath.width / 2, -clipPath.height / 2, size, clipPath.height);
         this._ctx.restore();
         this._ctx.closePath();
         this._ctx.clip();
@@ -115,13 +123,13 @@ var SkewSlider = (function () {
      * クリップパス領域の座標情報を返却する
      */
     SkewSlider.prototype._getClippingRegion = function () {
-        var width = this._width * Math.sin(utility_1.toRadian(this._angle));
-        var height = this._height * Math.cos(utility_1.toRadian(this._angle));
-        var size = width + height;
-        var posX = this._width / 2 - size / 2;
-        var posY = this._height / 2 - size / 2;
+        var width = Math.abs(this._width * Math.cos(utility_1.toRadian(this._angle))) + Math.abs(this._height * Math.sin(utility_1.toRadian(this._angle)));
+        var height = Math.abs(this._width * Math.sin(utility_1.toRadian(this._angle))) + Math.abs(this._height * Math.cos(utility_1.toRadian(this._angle)));
+        var posX = this._width / 2 - width / 2;
+        var posY = this._height / 2 - height / 2;
         return {
-            size: size,
+            width: width,
+            height: height,
             x: posX,
             y: posY
         };
