@@ -5,7 +5,7 @@ skewSlider
 
 ## Demo
 
-- [http://isoden.github.io/skewSlider/demo](http://isoden.github.io/skewSlider/demo)
+- [http://isoden.github.io/skewslider/demo](http://isoden.github.io/skewslider/demo)
 
 ## Installation
 
