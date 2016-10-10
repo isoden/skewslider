@@ -1,3 +1,6 @@
+'use strict';
+
+import { Promise } from 'es6-promise';
 
 interface TweenOptions {
   start      : number;
@@ -42,7 +45,7 @@ export function raf(callback: Function) {
     window.requestAnimationFrame ||
     (<any>window).mozRequestAnimationFrame ||
     (<any>window).webkitRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
+    (<any>window).msRequestAnimationFrame ||
     function (callback: Function) {
       return setTimeout(callback, 1000 / 60);
     }

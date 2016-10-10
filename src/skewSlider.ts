@@ -1,10 +1,8 @@
-/// <reference path="../typings/bundle.d.ts" />
+'use strict';
 
-import {Promise} from 'es6-promise';
-import {
-  tween,
-  toRadian
-} from './utility';
+import { Promise } from 'es6-promise';
+
+import { tween, toRadian } from './utility';
 
 interface SkewSliderOptions {
   el       : HTMLCanvasElement;
