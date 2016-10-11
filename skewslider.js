@@ -1,5 +1,5 @@
 /*!
- *  skewSlider.js v1.1.4
+ *  skewSlider.js v1.2.0
  * https://github.com/isoden/skewslider.git
  * 
  * Copyright (c) 2016 isoden <isoda@maboroshi.biz> (http://isoden.me)
@@ -82,11 +82,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._angle = angle;
 	        this._interval = interval;
 	        this._duration = duration;
-	        this._preload(sources).then(function () {
+	        this.ready = this._preload(sources).then(function () {
 	            _this._ctx.drawImage(_this._images[0], 0, 0);
 	            _this._ticker();
 	        });
 	    }
+	    /**
+	     * インスタンスを破棄する
+	     */
+	    SkewSlider.prototype.dispose = function () {
+	        clearTimeout(this._timerId);
+	        this._tweener && this._tweener.flush();
+	    };
 	    /**
 	     * 画像の事前読み込み
 	     */
@@ -111,7 +118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    SkewSlider.prototype._ticker = function () {
 	        var _this = this;
-	        setTimeout(function () {
+	        this._timerId = setTimeout(function () {
 	            _this._animate().then(function () {
 	                _this._visibleIndex = _this._getNextVisibleIndex();
 	                _this._ticker();
@@ -124,7 +131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    SkewSlider.prototype._animate = function () {
 	        var _this = this;
 	        var direction = Math.abs(this._width * Math.cos(utility_1.toRadian(this._angle))) + Math.abs(this._height * Math.sin(utility_1.toRadian(this._angle)));
-	        return utility_1.tween({
+	        this._tweener = utility_1.tween({
 	            start: direction,
 	            end: 0,
 	            duration: this._duration,
@@ -136,6 +143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _this._ctx.restore();
 	            }
 	        });
+	        return this._tweener.result;
 	    };
 	    /**
 	     * 次に表示させる画像のインデックスを返却
@@ -1375,7 +1383,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var defer = new Deferred();
 	    var prevTime = Date.now();
 	    var elapsedTime = 0;
-	    var timer = exports.raf(function ticker() {
+	    var canceled = false;
+	    var timerId = exports.raf(function ticker() {
+	        if (canceled) {
+	            exports.cancelRaf(timerId);
+	            return;
+	        }
 	        var now = Date.now();
 	        var timeRate = elapsedTime / duration;
 	        var changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
@@ -1384,14 +1397,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	        elapsedTime += now - prevTime;
 	        prevTime = now;
 	        if (elapsedTime >= duration) {
-	            exports.cancelRaf(timer);
+	            exports.cancelRaf(timerId);
 	            onUpdate(end);
 	            onComplete(end);
 	            return defer.resolve();
 	        }
 	        exports.raf(ticker);
 	    });
-	    return defer.promise;
+	    return {
+	        result: defer.promise,
+	        flush: function () {
+	            canceled = true;
+	            exports.cancelRaf(timerId);
+	            defer.reject();
+	        }
+	    };
 	}
 	exports.tween = tween;
 	var Deferred = (function () {

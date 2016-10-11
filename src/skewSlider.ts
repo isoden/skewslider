@@ -2,7 +2,7 @@
 
 import { Promise } from 'es6-promise';
 
-import { tween, toRadian, once, Deferred } from './utility';
+import { tween, TweenResult, toRadian, once, Deferred } from './utility';
 
 interface Options {
   el: HTMLCanvasElement;
@@ -29,6 +29,9 @@ class SkewSlider {
   protected _angle: number;
   protected _interval: number;
   protected _duration: number;
+  protected _timerId: number;
+  protected _tweener: TweenResult;
+  public ready: Promise<void>;
 
   /**
    * 初期化処理
@@ -44,10 +47,18 @@ class SkewSlider {
     this._interval     = interval;
     this._duration     = duration;
 
-    this._preload(sources).then(() => {
+    this.ready = this._preload(sources).then(() => {
       this._ctx.drawImage(this._images[0], 0, 0);
       this._ticker();
     });
+  }
+
+  /**
+   * インスタンスを破棄する
+   */
+  dispose() {
+    clearTimeout(this._timerId);
+    this._tweener && this._tweener.flush();
   }
 
   /**
@@ -76,7 +87,7 @@ class SkewSlider {
    * ループ再生
    */
   protected _ticker(): void {
-    setTimeout(() => {
+    this._timerId = setTimeout(() => {
       this._animate().then(() => {
         this._visibleIndex = this._getNextVisibleIndex();
         this._ticker();
@@ -90,7 +101,7 @@ class SkewSlider {
   protected _animate() {
     const direction = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
 
-    return tween({
+    this._tweener = tween({
       start   : direction,
       end     : 0,
       duration: this._duration,
@@ -101,7 +112,9 @@ class SkewSlider {
         this._drawImage(this._visibleIndex);
         this._ctx.restore();
       }
-    })
+    });
+
+    return this._tweener.result;
   }
 
   /**

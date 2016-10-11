@@ -12,12 +12,23 @@ interface TweenOptions {
   onComplete?: (value: number) => void;
 }
 
-export function tween({start, end, duration, onUpdate = noop, onComplete = noop}: TweenOptions) {
+export interface TweenResult {
+  result: Promise<void>;
+  flush: () => void;
+}
+
+export function tween({start, end, duration, onUpdate = noop, onComplete = noop}: TweenOptions): TweenResult {
   const diff      = end - start;
   const defer     = new Deferred<void>();
   let prevTime    = Date.now();
   let elapsedTime = 0;
-  let timer       = raf(function ticker() {
+  let canceled    = false;
+  let timerId     = raf(function ticker() {
+    if (canceled) {
+      cancelRaf(timerId);
+      return;
+    }
+
     let now         = Date.now();
     let timeRate    = elapsedTime / duration;
     let changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
@@ -29,7 +40,7 @@ export function tween({start, end, duration, onUpdate = noop, onComplete = noop}
     prevTime = now;
 
     if (elapsedTime >= duration) {
-      cancelRaf(timer);
+      cancelRaf(timerId);
       onUpdate(end);
       onComplete(end);
       return defer.resolve();
@@ -38,7 +49,14 @@ export function tween({start, end, duration, onUpdate = noop, onComplete = noop}
     raf(ticker);
   });
 
-  return defer.promise;
+  return {
+    result: defer.promise,
+    flush() {
+      canceled = true;
+      cancelRaf(timerId);
+      defer.reject();
+    }
+  };
 }
 
 export class Deferred<T> {
