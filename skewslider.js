@@ -1,5 +1,5 @@
 /*!
- *  skewSlider.js v1.1.3
+ *  skewSlider.js v1.1.4
  * https://github.com/isoden/skewslider.git
  * 
  * Copyright (c) 2016 isoden <isoda@maboroshi.biz> (http://isoden.me)
@@ -94,25 +94,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var _this = this;
 	        return es6_promise_1.Promise.all(sources.map(function (src) {
 	            var img = document.createElement('img');
-	            return new es6_promise_1.Promise(function (resolve, reject) {
-	                function onload() {
-	                    removeListener();
-	                    resolve();
-	                }
-	                function onerror() {
-	                    removeListener();
-	                    reject();
-	                }
-	                function removeListener() {
-	                    img.removeEventListener('load', onload);
-	                    img.removeEventListener('error', onerror);
-	                }
-	                img.addEventListener('load', onload, false);
-	                img.addEventListener('error', onerror, false);
-	                img.src = src;
-	                _this._images.push(img);
+	            var defer = new utility_1.Deferred();
+	            utility_1.once(img, 'load error', function (event) {
+	                return event.type === 'load'
+	                    ? defer.resolve(img)
+	                    : defer.reject(event.message);
 	            });
-	        }));
+	            img.src = src;
+	            return defer.promise;
+	        }))
+	            .then(function (result) { return _this._images = result; })
+	            .catch(function (message) { return console.error(message); });
 	    };
 	    /**
 	     * ループ再生
@@ -193,7 +185,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_RESULT__;var require;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
+	var require;var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
 	 * @overview es6-promise - a tiny implementation of Promises/A+.
 	 * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
 	 * @license   Licensed under MIT license
@@ -1380,47 +1372,91 @@ return /******/ (function(modules) { // webpackBootstrap
 	function tween(_a) {
 	    var start = _a.start, end = _a.end, duration = _a.duration, _b = _a.onUpdate, onUpdate = _b === void 0 ? noop : _b, _c = _a.onComplete, onComplete = _c === void 0 ? noop : _c;
 	    var diff = end - start;
+	    var defer = new Deferred();
 	    var prevTime = Date.now();
 	    var elapsedTime = 0;
-	    return new es6_promise_1.Promise(function (resolve) {
-	        var timer = raf(function ticker() {
-	            var now = Date.now();
-	            var timeRate = elapsedTime / duration;
-	            var changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
-	            onUpdate(changeValue);
-	            // 1フレーム分の時間を経過時間に加算
-	            elapsedTime += now - prevTime;
-	            prevTime = now;
-	            if (elapsedTime >= duration) {
-	                cancelRaf(timer);
-	                onUpdate(end);
-	                onComplete(end);
-	                return resolve();
-	            }
-	            raf(ticker);
+	    var timer = exports.raf(function ticker() {
+	        var now = Date.now();
+	        var timeRate = elapsedTime / duration;
+	        var changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
+	        onUpdate(changeValue);
+	        // 1フレーム分の時間を経過時間に加算
+	        elapsedTime += now - prevTime;
+	        prevTime = now;
+	        if (elapsedTime >= duration) {
+	            exports.cancelRaf(timer);
+	            onUpdate(end);
+	            onComplete(end);
+	            return defer.resolve();
+	        }
+	        exports.raf(ticker);
+	    });
+	    return defer.promise;
+	}
+	exports.tween = tween;
+	var Deferred = (function () {
+	    function Deferred() {
+	        var _this = this;
+	        this.promise = new es6_promise_1.Promise(function (resolve, reject) {
+	            _this.resolve = resolve;
+	            _this.reject = reject;
+	        });
+	    }
+	    return Deferred;
+	}());
+	exports.Deferred = Deferred;
+	/**
+	 * 一度だけ実行されるコールバック関数を登録する
+	 * @params target   対象の要素
+	 * @params type     イベント名。空白区切りで複数指定可
+	 * @params callback 実行されるコールバック関数
+	 */
+	function once(target, type, callback) {
+	    type.split(/\s/).forEach(function (type) {
+	        target.addEventListener(type, function listener(event) {
+	            target.removeEventListener(type, listener);
+	            return callback(event);
 	        });
 	    });
 	}
-	exports.tween = tween;
-	function raf(callback) {
-	    return (window.requestAnimationFrame ||
-	        window.mozRequestAnimationFrame ||
-	        window.webkitRequestAnimationFrame ||
-	        window.msRequestAnimationFrame ||
-	        function (callback) {
-	            return setTimeout(callback, 1000 / 60);
-	        })(callback);
+	exports.once = once;
+	/**
+	 * 渡された関数名の配列の内有効なメソッドが存在する場合にその関数を返却する。
+	 * 存在しなかった場合はfallbackを指定しておけばそれが返却される
+	 *
+	 * @params methodNames 関数名の配列
+	 * @params target      ターゲット
+	 * @params fallback    メソッドが存在しなかったときの代替実装
+	 */
+	function getMethod(methodNames, target, fallback) {
+	    if (target === void 0) { target = window; }
+	    var results = methodNames.filter(function (methodName) { return !!target[methodName]; });
+	    return (function () {
+	        var args = [];
+	        for (var _i = 0; _i < arguments.length; _i++) {
+	            args[_i - 0] = arguments[_i];
+	        }
+	        return target[results[0]].apply(target, args);
+	    }) || fallback;
 	}
-	exports.raf = raf;
-	function cancelRaf(requestId) {
-	    return (window.cancelAnimationFrame ||
-	        window.mozCancelAnimationFrame ||
-	        window.webkitCancelAnimationFrame ||
-	        function (requestId) {
-	            clearTimeout(requestId);
-	        })(requestId);
-	}
-	exports.cancelRaf = cancelRaf;
+	/**
+	 * requestAnimationFrame のショートカット
+	 * 存在しない場合はポリフィルが使われる
+	 */
+	exports.raf = getMethod([
+	    'requestAnimationFrame',
+	    'webkitRequestAnimationFrame',
+	    'mozRequestAnimationFrame'
+	], window, function (callback) { return setTimeout(callback, 1000 / 60); });
+	/**
+	 * cancelAnimationFrame のショートカット
+	 * 存在しない場合はポリフィルが使われる
+	 */
+	exports.cancelRaf = getMethod([
+	    'cancelAnimationFrame',
+	    'webkitCancelAnimationFrame',
+	    'mozCancelAnimationFrame'
+	], window, function (requestId) { return clearTimeout(requestId); });
 	function toRadian(degree) {
 	    return degree * Math.PI / 180;
 	}

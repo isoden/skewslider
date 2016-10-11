@@ -2,7 +2,7 @@
 
 import { Promise } from 'es6-promise';
 
-import { tween, toRadian } from './utility';
+import { tween, toRadian, once, Deferred } from './utility';
 
 interface Options {
   el: HTMLCanvasElement;
@@ -55,31 +55,21 @@ class SkewSlider {
    */
   protected _preload(sources: string[]) {
     return Promise.all(sources.map(src => {
-      const img = document.createElement('img');
+      const img   = document.createElement('img');
+      const defer = new Deferred<HTMLImageElement>();
 
-      return new Promise((resolve, reject) => {
-        function onload() {
-          removeListener();
-          resolve();
-        }
-
-        function onerror() {
-          removeListener();
-          reject();
-        }
-
-        function removeListener() {
-          img.removeEventListener('load', onload);
-          img.removeEventListener('error', onerror);
-        }
-
-        img.addEventListener('load' , onload, false);
-        img.addEventListener('error', onerror, false);
-        img.src = src;
-
-        this._images.push(img);
+      once(img, 'load error', (event) => {
+        return event.type === 'load'
+          ? defer.resolve(img)
+          : defer.reject((event as ErrorEvent).message);
       });
-    }));
+
+      img.src = src;
+
+      return defer.promise;
+    }))
+    .then(result => this._images = result)
+    .catch(message => console.error(message));
   }
 
   /**
