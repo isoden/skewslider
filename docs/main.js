@@ -23,7 +23,7 @@
     this.height = ko.observable(300);
 
     /** 次の画像に移るまでの時間 */
-    this.interval = ko.observable(4000);
+    this.interval = ko.observable(3000);
 
     /** アニメーションにかける時間 */
     this.duration = ko.observable(1400);
@@ -48,8 +48,7 @@
         sources  : [
           `http://placeimg.com/${ this.width() }/${ this.height() }/people`,
           `http://placeimg.com/${ this.width() }/${ this.height() }/tech`,
-          `http://placeimg.com/${ this.width() }/${ this.height() }/animals`,
-          `http://placeimg.com/${ this.width() }/${ this.height() }/nature`
+          `http://placeimg.com/${ this.width() }/${ this.height() }/animals`
         ]
       });
 
