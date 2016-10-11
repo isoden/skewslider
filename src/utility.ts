@@ -4,14 +4,25 @@ import { Promise } from 'es6-promise';
 
 const noop = () => {};
 
+/** トゥイーンの設定 */
 interface TweenOptions {
+  /** 開始時の値 */
   start: number;
+
+  /** 終了時の値 */
   end: number;
+
+  /** 変更にかける時間 */
   duration: number;
+
+  /** 値変更を伝えるコールバック */
   onUpdate?: (value: number) => void;
+
+  /** 完了を伝えるコールバック */
   onComplete?: (value: number) => void;
 }
 
+/** tween関数の返却値 */
 export interface TweenResult {
   result: Promise<void>;
   flush: () => void;

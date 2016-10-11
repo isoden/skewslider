@@ -9,10 +9,11 @@ const webpack = require('webpack');
 
 module.exports = {
   entry: {
-    skewSlider: './src/skewSlider.ts'
+    'skewslider.js'     : './src/skewSlider.ts',
+    'docs/skewslider.js': './src/skewSlider.ts'
   },
   output: {
-    filename     : './[name].js',
+    filename     : '[name]',
     library      : 'SkewSlider',
     libraryTarget: 'umd'
   },

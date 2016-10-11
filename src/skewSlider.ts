@@ -4,6 +4,7 @@ import { Promise } from 'es6-promise';
 
 import { tween, TweenResult, toRadian, once, Deferred } from './utility';
 
+/** インスタンス固有の設定 */
 interface Options {
   el: HTMLCanvasElement;
   angle: number;
@@ -12,6 +13,7 @@ interface Options {
   duration: number;
 }
 
+/** 切り取り範囲 */
 interface ClipPathRegion {
   width: number;
   height: number;
@@ -19,19 +21,53 @@ interface ClipPathRegion {
   y: number;
 }
 
-class SkewSlider {
+export class SkewSlider {
+  /** 描画対象のCanvas要素 */
   protected _el: HTMLCanvasElement;
+
+  /** 描画コンテキスト */
   protected _ctx: CanvasRenderingContext2D;
+
+  /** スライダーの横幅 */
   protected _width: number;
+
+  /** スライダーの縦幅 */
   protected _height: number;
-  protected _images: HTMLImageElement[];
-  protected _visibleIndex: number;
+
+  /** 表示させる画像のリスト */
+  protected _images: HTMLImageElement[] = [];
+
+  /** _images の中で表示中の画像の添字番号 */
+  protected _visibleIndex = 0;
+
+  /** クリップ領域の回転角 */
   protected _angle: number;
+
+  /** 次の画像に移るまでの時間 */
   protected _interval: number;
+
+  /** アニメーションにかける時間 */
   protected _duration: number;
+
+  /** ループのタイマーID */
   protected _timerId: number;
+
+  /** アニメーション中のトゥイーン */
   protected _tweener: TweenResult;
+
+  /** 画像のロード状況を返すプロミス */
   public ready: Promise<void>;
+
+  /**
+   * 次に表示させる画像のインデックス
+   */
+  protected get _getNextVisibleIndex() {
+    const current = this._visibleIndex;
+
+    return current === this._images.length - 1
+      ? 0
+      : current + 1;
+  }
 
   /**
    * 初期化処理
@@ -41,8 +77,6 @@ class SkewSlider {
     this._ctx          = this._el.getContext('2d');
     this._width        = this._el.width;
     this._height       = this._el.height;
-    this._images       = [];
-    this._visibleIndex = 0;
     this._angle        = angle;
     this._interval     = interval;
     this._duration     = duration;
@@ -59,6 +93,20 @@ class SkewSlider {
   dispose() {
     clearTimeout(this._timerId);
     this._tweener && this._tweener.flush();
+
+    // 一応 null を突っ込む。意味ないかも
+    this._el           = null;
+    this._ctx          = null;
+    this._width        = null;
+    this._height       = null;
+    this._images       = null;
+    this._visibleIndex = null;
+    this._angle        = null;
+    this._interval     = null;
+    this._duration     = null;
+    this._timerId      = null;
+    this._tweener      = null;
+    this.ready         = null;
   }
 
   /**
@@ -89,7 +137,7 @@ class SkewSlider {
   protected _ticker(): void {
     this._timerId = setTimeout(() => {
       this._animate().then(() => {
-        this._visibleIndex = this._getNextVisibleIndex();
+        this._visibleIndex = this._getNextVisibleIndex;
         this._ticker();
       });
     }, this._interval);
@@ -107,7 +155,7 @@ class SkewSlider {
       duration: this._duration,
       onUpdate: value => {
         this._ctx.save();
-        this._drawImage(this._getNextVisibleIndex());
+        this._drawImage(this._getNextVisibleIndex);
         this._createClipPath(value);
         this._drawImage(this._visibleIndex);
         this._ctx.restore();
@@ -115,17 +163,6 @@ class SkewSlider {
     });
 
     return this._tweener.result;
-  }
-
-  /**
-   * 次に表示させる画像のインデックスを返却
-   */
-  protected _getNextVisibleIndex() {
-    const current = this._visibleIndex;
-
-    return current === this._images.length - 1
-      ? 0
-      : current + 1;
   }
 
   /**
@@ -164,4 +201,5 @@ class SkewSlider {
   }
 }
 
-export = SkewSlider;
+declare var module: any;
+module.exports = SkewSlider;

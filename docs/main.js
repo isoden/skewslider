@@ -17,10 +17,10 @@
     this.angle = ko.observable(30);
 
     /** スライダーの横幅 */
-    this.width = ko.observable(300);
+    this.width = ko.observable(810);
 
     /** スライダーの縦幅 */
-    this.height = ko.observable(300);
+    this.height = ko.observable(310);
 
     /** 次の画像に移るまでの時間 */
     this.interval = ko.observable(3000);
