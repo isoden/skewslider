@@ -2,22 +2,24 @@
 
 import { Promise } from 'es6-promise';
 
+const noop = () => {};
+
 interface TweenOptions {
-  start      : number;
-  end        : number;
-  duration   : number;
-  onUpdate   : Function;
-  onComplete : Function;
+  start: number;
+  end: number;
+  duration: number;
+  onUpdate?: (value: number) => void;
+  onComplete?: (value: number) => void;
 }
 
-export function tween({start, end, duration, onUpdate, onComplete}: TweenOptions) {
-  let diff        = end - start;
-  let prevTime    = +new Date();
+export function tween({start, end, duration, onUpdate = noop, onComplete = noop}: TweenOptions) {
+  const diff      = end - start;
+  let prevTime    = Date.now();
   let elapsedTime = 0;
 
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     let timer = raf(function ticker() {
-      let now         = +new Date();
+      let now         = Date.now();
       let timeRate    = elapsedTime / duration;
       let changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
 

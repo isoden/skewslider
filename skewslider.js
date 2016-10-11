@@ -1,6 +1,5 @@
 /*!
- * 
- * skewSlider.js v1.1.2
+ *  skewSlider.js v1.1.3
  * https://github.com/isoden/skewslider.git
  * 
  * Copyright (c) 2016 isoden <isoda@maboroshi.biz> (http://isoden.me)
@@ -83,8 +82,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._angle = angle;
 	        this._interval = interval;
 	        this._duration = duration;
-	        this._preload(sources)
-	            .then(function () {
+	        this._preload(sources).then(function () {
 	            _this._ctx.drawImage(_this._images[0], 0, 0);
 	            _this._ticker();
 	        });
@@ -138,7 +136,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            start: direction,
 	            end: 0,
 	            duration: this._duration,
-	            onComplete: function () { },
 	            onUpdate: function (value) {
 	                _this._ctx.save();
 	                _this._drawImage(_this._getNextVisibleIndex());
@@ -153,11 +150,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	     */
 	    SkewSlider.prototype._getNextVisibleIndex = function () {
 	        var current = this._visibleIndex;
-	        return current === this._images.length - 1 ? 0
+	        return current === this._images.length - 1
+	            ? 0
 	            : current + 1;
 	    };
 	    /**
-	     * CanvasRenderingContext2D.drawImageのショートカット
+	     * CanvasRenderingContext2D#drawImageのショートカット
 	     */
 	    SkewSlider.prototype._drawImage = function (index) {
 	        this._ctx.drawImage(this._images[index], 0, 0, this._width, this._height);
@@ -182,14 +180,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    SkewSlider.prototype._getClippingRegion = function () {
 	        var width = Math.abs(this._width * Math.cos(utility_1.toRadian(this._angle))) + Math.abs(this._height * Math.sin(utility_1.toRadian(this._angle)));
 	        var height = Math.abs(this._width * Math.sin(utility_1.toRadian(this._angle))) + Math.abs(this._height * Math.cos(utility_1.toRadian(this._angle)));
-	        var posX = this._width / 2 - width / 2;
-	        var posY = this._height / 2 - height / 2;
-	        return {
-	            width: width,
-	            height: height,
-	            x: posX,
-	            y: posY
-	        };
+	        var x = this._width / 2 - width / 2;
+	        var y = this._height / 2 - height / 2;
+	        return { width: width, height: height, x: x, y: y };
 	    };
 	    return SkewSlider;
 	}());
@@ -200,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var require;var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
+	var __WEBPACK_AMD_DEFINE_RESULT__;var require;/* WEBPACK VAR INJECTION */(function(process, global, module) {/*!
 	 * @overview es6-promise - a tiny implementation of Promises/A+.
 	 * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
 	 * @license   Licensed under MIT license
@@ -1383,14 +1376,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	var es6_promise_1 = __webpack_require__(1);
+	var noop = function () { };
 	function tween(_a) {
-	    var start = _a.start, end = _a.end, duration = _a.duration, onUpdate = _a.onUpdate, onComplete = _a.onComplete;
+	    var start = _a.start, end = _a.end, duration = _a.duration, _b = _a.onUpdate, onUpdate = _b === void 0 ? noop : _b, _c = _a.onComplete, onComplete = _c === void 0 ? noop : _c;
 	    var diff = end - start;
-	    var prevTime = +new Date();
+	    var prevTime = Date.now();
 	    var elapsedTime = 0;
-	    return new es6_promise_1.Promise(function (resolve, reject) {
+	    return new es6_promise_1.Promise(function (resolve) {
 	        var timer = raf(function ticker() {
-	            var now = +new Date();
+	            var now = Date.now();
 	            var timeRate = elapsedTime / duration;
 	            var changeValue = diff * (1 - Math.pow((1 - timeRate), 3)) + start;
 	            onUpdate(changeValue);

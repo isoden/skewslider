@@ -4,36 +4,36 @@ import { Promise } from 'es6-promise';
 
 import { tween, toRadian } from './utility';
 
-interface SkewSliderOptions {
-  el       : HTMLCanvasElement;
-  angle    : number;
-  sources  : string[];
-  interval : number;
-  duration : number;
+interface Options {
+  el: HTMLCanvasElement;
+  angle: number;
+  sources: string[];
+  interval: number;
+  duration: number;
 }
 
 interface ClipPathRegion {
-  width  : number;
-  height : number;
-  x      : number;
-  y      : number;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
 }
 
 class SkewSlider {
-  protected _el           : HTMLCanvasElement;
-  protected _ctx          : CanvasRenderingContext2D;
-  protected _width        : number;
-  protected _height       : number;
-  protected _images       : HTMLImageElement[];
-  protected _visibleIndex : number;
-  protected _angle        : number;
-  protected _interval     : number;
-  protected _duration     : number;
+  protected _el: HTMLCanvasElement;
+  protected _ctx: CanvasRenderingContext2D;
+  protected _width: number;
+  protected _height: number;
+  protected _images: HTMLImageElement[];
+  protected _visibleIndex: number;
+  protected _angle: number;
+  protected _interval: number;
+  protected _duration: number;
 
   /**
    * 初期化処理
    */
-  constructor({el, sources, angle = 0, interval = 2000, duration = 1000}: SkewSliderOptions) {
+  constructor({el, sources, angle = 0, interval = 2000, duration = 1000}: Options) {
     this._el           = el;
     this._ctx          = this._el.getContext('2d');
     this._width        = this._el.width;
@@ -44,28 +44,30 @@ class SkewSlider {
     this._interval     = interval;
     this._duration     = duration;
 
-    this._preload(sources)
-      .then(() => {
-        this._ctx.drawImage(this._images[0], 0, 0);
-        this._ticker();
-      });
+    this._preload(sources).then(() => {
+      this._ctx.drawImage(this._images[0], 0, 0);
+      this._ticker();
+    });
   }
 
   /**
    * 画像の事前読み込み
    */
   protected _preload(sources: string[]) {
-    return Promise.all(sources.map((src: string) => {
-      let img   = document.createElement('img');
+    return Promise.all(sources.map(src => {
+      const img = document.createElement('img');
+
       return new Promise((resolve, reject) => {
         function onload() {
           removeListener();
           resolve();
         }
+
         function onerror() {
           removeListener();
           reject();
         }
+
         function removeListener() {
           img.removeEventListener('load', onload);
           img.removeEventListener('error', onerror);
@@ -96,13 +98,13 @@ class SkewSlider {
    * クリップパスの領域をアニメーションする
    */
   protected _animate() {
-    let direction = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
+    const direction = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
+
     return tween({
-      start      : direction,
-      end        : 0,
-      duration   : this._duration,
-      onComplete : () => {},
-      onUpdate   : (value: number) => {
+      start   : direction,
+      end     : 0,
+      duration: this._duration,
+      onUpdate: value => {
         this._ctx.save();
         this._drawImage(this._getNextVisibleIndex());
         this._createClipPath(value);
@@ -116,13 +118,15 @@ class SkewSlider {
    * 次に表示させる画像のインデックスを返却
    */
   protected _getNextVisibleIndex() {
-    let current = this._visibleIndex;
-    return current === this._images.length - 1 ? 0
-                                               : current + 1;
+    const current = this._visibleIndex;
+
+    return current === this._images.length - 1
+      ? 0
+      : current + 1;
   }
 
   /**
-   * CanvasRenderingContext2D.drawImageのショートカット
+   * CanvasRenderingContext2D#drawImageのショートカット
    */
   protected _drawImage(index: number) {
     this._ctx.drawImage(this._images[index], 0, 0, this._width, this._height);
@@ -132,7 +136,7 @@ class SkewSlider {
    * クリップパスの領域を作る
    */
   protected _createClipPath(size: number) {
-    let clipPath = this._getClippingRegion();
+    const clipPath = this._getClippingRegion();
 
     this._ctx.beginPath();
     this._ctx.save();
@@ -148,19 +152,13 @@ class SkewSlider {
    * クリップパス領域の座標情報を返却する
    */
   protected _getClippingRegion(): ClipPathRegion {
-    let width  = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
-    let height = Math.abs(this._width * Math.sin(toRadian(this._angle))) + Math.abs(this._height * Math.cos(toRadian(this._angle)));
-    let posX   = this._width  / 2 - width  / 2;
-    let posY   = this._height / 2 - height / 2;
+    const width  = Math.abs(this._width * Math.cos(toRadian(this._angle))) + Math.abs(this._height * Math.sin(toRadian(this._angle)));
+    const height = Math.abs(this._width * Math.sin(toRadian(this._angle))) + Math.abs(this._height * Math.cos(toRadian(this._angle)));
+    const x      = this._width  / 2 - width  / 2;
+    const y      = this._height / 2 - height / 2;
 
-    return {
-      width,
-      height,
-      x    : posX,
-      y    : posY
-    };
+    return { width, height, x, y };
   }
 }
-
 
 export = SkewSlider;
